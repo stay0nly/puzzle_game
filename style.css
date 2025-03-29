@@ -1,0 +1,58 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #1a1a1a;
+    color: #ddd;
+    font-family: sans-serif;
+}
+
+#game-container {
+    display: grid;
+    grid-template-columns: repeat(5, 80px);
+    grid-template-rows: repeat(5, 80px);
+    gap: 5px;
+    border: 2px solid #555;
+    padding: 10px;
+}
+
+.grid-cell {
+    border: 1px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #222;
+}
+
+.shape {
+    width: 80px; /* Adjusted to match grid cell width */
+    height: 80px; /* Adjusted to match grid cell height */
+    cursor: grab;
+    position: absolute;
+}
+
+.shape.dragging {
+    opacity: 0.5;
+}
+
+.target {
+    background-color: #444;
+}
+
+#controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#timer, #level {
+    margin: 10px;
+}
+
+.hinted {
+    /* Add any additional hint styling here, like a border or shadow */
+    border: 2px dashed black;
+  }
