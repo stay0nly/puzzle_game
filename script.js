@@ -313,7 +313,7 @@ function getLevelData(level) {
     let startLeft = 10;
     let startTop = 10;
     const spacing = 90;
-    let numShapes = Math.min(level + 2, 9);
+    let numShapes = Math.min(level + 2, 9); // Number of shapes
     const shapes = [];
     const targets = [];
     const colors = ['lightblue', 'lightgreen', 'lightcoral', 'yellow', 'orange', 'purple', 'cyan', 'pink', 'brown', 'gray', 'olive', 'teal', 'indigo', 'violet', 'gold', 'silver', 'salmon', 'coral', 'khaki', 'lavender', 'lime', 'maroon', 'blue', 'red', 'green', 'navy', 'crimson', 'forestgreen', 'goldenrod', 'darkorange', 'mediumpurple', 'skyblue', 'firebrick', 'seagreen', 'darkgoldenrod', 'peru', 'thistle'];
@@ -354,6 +354,10 @@ function getLevelData(level) {
             startTop: `${shapeTop}px`,
             target: target
         });
+    }
+
+    //only push targets here.
+    for(let target of usedTargets){
         targets.push(target);
     }
 

@@ -7,7 +7,7 @@ body {
     margin: 0;
     background-color: #1a1a1a;
     color: #ddd;
-    font-family: sans-serif;
+    font-family: 'Sagoe UI', sans-serif;
 }
 
 #game-container {
@@ -55,7 +55,38 @@ body {
 #controls {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 15px; /* Reduce margin */
+    background-color: #2a2a2a;
+    padding: 10px; /* Reduce padding */
+    border-radius: 8px; /* Reduce border-radius */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4); /* Reduce shadow */
+}
+
+#controls button {
+    padding: 8px 15px; /* Reduce padding for buttons */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px; /* Reduce border-radius for buttons */
+    cursor: pointer;
+    margin: 0 5px; /* Reduce horizontal margin between buttons */
+    font-size: 14px; /* Reduce font size */
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+#controls button:hover {
+    background-color: #0056b3;
+}
+
+#controls button.hint-disabled { /* Add this style */
+    background-color: #888; /* Grey background */
+    color: #ccc; /* Light grey text */
+    cursor: not-allowed; /* Change cursor to "not-allowed" */
+}
+
+#controls button.hint-disabled:hover { /* Disable hover effect */
+    background-color: #888;
 }
 
 #timer, #level {
@@ -77,4 +108,66 @@ hint-disabled {
 #hint-button {
   /* add these lines to the hint button */
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#login-form, #registration-form, #account-page { /* Add #account-page here */
+    background-color: #2a2a2a;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+    width: 350px;
+    text-align: center;
+}
+
+#login-form h2, #registration-form h2, #account-page h2 { /* Add #account-page here */
+    color: #ddd;
+    margin-bottom: 30px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+#login-form input, #registration-form input, #account-page input { /* Add #account-page here */
+    width: calc(100% - 24px);
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+#login-form button, #registration-form button, #account-page button { /* Add #account-page here */
+    width: 100%;
+    padding: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+#login-form button:hover, #registration-form button:hover, #account-page button:hover { /* Add #account-page here */
+    background-color: #0056b3;
+}
+
+#login-form a, #registration-form a, #account-page a { /* Add #account-page here. If you add links to account page */
+    color: #007bff;
+    text-decoration: none;
+    font-size: 16px;
+    transition: text-decoration 0.3s ease;
+}
+
+#login-form a:hover, #registration-form a:hover, #account-page a:hover { /* Add #account-page here. If you add links to account page */
+    text-decoration: underline;
+}
+
+#login-form p, #registration-form p, #account-page p { /* Add #account-page here. If you add paragraphs to account page */
+    margin-top: 15px;
+    font-size: 16px;
 }
