@@ -9,6 +9,7 @@
 <body>
     <div id="registration-form" style="display: none;">
         <h2>Register</h2>
+        <input type="text" id="register-nickname" placeholder="Nickname" required><br>
         <input type="email" id="register-email" placeholder="Email" required><br>
         <input type="password" id="register-password" placeholder="Password" required><br>
         <button id="register-button">Register</button>
@@ -26,14 +27,19 @@
     <div id="game-content" style="display: none;">
         <div id="level">Level: 1</div>
         <div id="timer">Time: 0:00</div>
+        <div id="score">Score: 0</div>
+        <div id="leaderboard">
+            <h2>Leaderboard</h2>
+            <ol id="leaderboard-list"></ol>
+        </div>
         <div id="game-container">
             <div id="start-message">Press Start to begin</div>
         </div>
         <div id="controls">
             <button id="start-button">Start</button>
-            <button id="hint-button">Hint</button>
-            <button id="reset-button">Reset</button>
-            <button id="pause-button">Pause</button>
+            <button id="hint-button" disabled>Hint</button>
+            <button id="reset-button" disabled>Reset</button>
+            <button id="pause-button" disabled>Pause</button>
             <button id="logout-button">Logout</button>
             <button id="account-button">Account</button>
         </div>

@@ -1,6 +1,7 @@
 const registrationForm = document.getElementById('registration-form');
 const loginForm = document.getElementById('login-form');
 const gameContent = document.getElementById('game-content');
+const registerNicknameInput = document.getElementById('register-nickname');
 const registerEmailInput = document.getElementById('register-email');
 const registerPasswordInput = document.getElementById('register-password');
 const loginEmailInput = document.getElementById('login-email');
@@ -28,7 +29,11 @@ const changeEmailInput = document.getElementById('change-email-input');
 const changePasswordInput = document.getElementById('change-password-input');
 const saveAccountButton = document.getElementById('save-account-button');
 const closeAccountButton = document.getElementById('close-account-button');
+const scoreDisplay = document.getElementById('score');
+const leaderboardList = document.getElementById('leaderboard-list');
 
+
+let score = 0;
 let shapes = [];
 let targets = [];
 let level = 1;
@@ -53,15 +58,20 @@ if (currentUser) {
 
 // Registration
 registerButton.addEventListener('click', () => {
+    const nickname = registerNicknameInput.value;
     const email = registerEmailInput.value;
     const password = registerPasswordInput.value;
     const users = JSON.parse(localStorage.getItem('users')) || {};
+
     if (users[email]) {
         alert('Email already registered.');
         return;
     }
+
     users[email] = password;
     localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem(`nickname-${email}`, nickname); // Store nickname
+
     alert('Registration successful. Please log in.');
     registrationForm.style.display = 'none';
     loginForm.style.display = 'block';
@@ -113,6 +123,11 @@ startButton.addEventListener('click', () => {
     startGame();
     startButton.style.display = 'none';
     startMessage.style.display = 'none';
+
+    // Enable buttons when game starts
+    hintButton.disabled = false;
+    resetButton.disabled = false;
+    pauseButton.disabled = false;
 });
 
 // Account button
@@ -267,6 +282,49 @@ function snapToGrid(shapeObj) {
     if (snapped) checkWin();
 }
 
+// Function to update the leaderboard
+function updateLeaderboard(nickname, score) {
+    let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    let playerIndex = -1;
+
+    // Check if player already exists in leaderboard
+    for (let i = 0; i < leaderboard.length; i++) {
+        if (leaderboard[i].nickname === nickname) {
+            playerIndex = i;
+            break;
+        }
+    }
+
+    if (playerIndex !== -1) {
+        // Player exists, update score if new score is higher
+        if (score > leaderboard[playerIndex].score) {
+            leaderboard[playerIndex].score = score;
+        }
+    } else {
+        // Player doesn't exist, add new entry
+        leaderboard.push({ nickname, score });
+    }
+
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard = leaderboard.slice(0, 10);
+    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+    displayLeaderboard();
+}
+
+// Function to display the leaderboard
+function displayLeaderboard() {
+    let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    leaderboardList.innerHTML = '';
+    leaderboard.forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry.nickname}: ${entry.score}`;
+        leaderboardList.appendChild(li);
+    });
+}
+
+// Call displayLeaderboard on page load
+displayLeaderboard();
+
 function checkWin() {
     let allCorrect = true;
     shapes.forEach(shapeObj => {
@@ -276,10 +334,27 @@ function checkWin() {
             allCorrect = false;
         }
     });
+
     if (allCorrect) {
         level++;
         levelDisplay.textContent = `Level: ${level}`;
         totalTime += 30;
+
+        // Calculate score
+        const levelPoints = 20 * (2 ** (level - 2)); // Calculate points based on level
+        if (level === 1){
+            levelPoints = 20;
+        }
+
+        score += levelPoints;
+        scoreDisplay.textContent = `Score: ${score}`;
+
+        // Update leaderboard if score is 20 or more
+        if (score >= 20) {
+            const nickname = localStorage.getItem(`nickname-${currentUser}`) || 'Player';
+            updateLeaderboard(nickname, score);
+        }
+
         loadLevel(level);
     }
 }
@@ -393,12 +468,16 @@ pauseButton.addEventListener('click', () => {
 function resetGame() {
     level = 1;
     totalTime = 60;
+    score = 0;
+    scoreDisplay.textContent = `Score: ${score}`;
     levelDisplay.textContent = `Level: ${level}`;
     timerDisplay.textContent = 'Time: 1:00';
     clearInterval(timerInterval);
     gameContainer.innerHTML = '';
     hintUsed = false;
     hintButton.classList.remove('hint-disabled');
-    hintButton.disabled = false; // Enable the button
+    hintButton.disabled = false;
+    resetButton.disabled = false;
+    pauseButton.disabled = false;
     startGame();
 }
