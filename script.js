@@ -32,6 +32,22 @@ const closeAccountButton = document.getElementById('close-account-button');
 const scoreDisplay = document.getElementById('score');
 const leaderboardList = document.getElementById('leaderboard-list');
 
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAxPMh5eVCYvczqJr3d0isPL5aKC828AJc",
+    authDomain: "puzzle-game-6cfac.firebaseapp.com",
+    projectId: "puzzle-game-6cfac",
+    storageBucket: "puzzle-game-6cfac.firebasestorage.app",
+    messagingSenderId: "417560576370",
+    appId: "1:417560576370:web:d28e73f9227eea55251deb",
+    measurementId: "G-7GVX10LZLW"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const auth = firebase.auth();
+
 
 let score = 0;
 let shapes = [];
@@ -56,44 +72,53 @@ if (currentUser) {
     gameContent.style.display = 'none';
 }
 
-// Registration
+// Registration with Firebase Authentication
 registerButton.addEventListener('click', () => {
     const nickname = registerNicknameInput.value;
     const email = registerEmailInput.value;
     const password = registerPasswordInput.value;
-    const users = JSON.parse(localStorage.getItem('users')) || {};
 
-    if (users[email]) {
-        alert('Email already registered.');
-        return;
-    }
-
-    users[email] = password;
-    localStorage.setItem('users', JSON.stringify(users));
-    localStorage.setItem(`nickname-${email}`, nickname); // Store nickname
-
-    alert('Registration successful. Please log in.');
-    registrationForm.style.display = 'none';
-    loginForm.style.display = 'block';
+    auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            // Store nickname in Firebase Realtime Database
+            database.ref('users/' + user.uid).set({
+                nickname: nickname
+            });
+            alert('Registration successful. Please log in.');
+            registrationForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
 });
 
 // Login
 loginButton.addEventListener('click', () => {
     const email = loginEmailInput.value;
     const password = loginPasswordInput.value;
-    const users = JSON.parse(localStorage.getItem('users')) || {};
-    if (users[email] && users[email] === password) {
-        currentUser = email;
-        localStorage.setItem('currentUser', currentUser);
-        loginForm.style.display = 'none';
-        gameContent.style.display = 'block';
-        totalTime = 60;
-        timerDisplay.textContent = 'Time: 1:00';
-        startMessage.style.display = 'block';
-        startButton.style.display = 'block';
-    } else {
-        alert('Invalid email or password.');
-    }
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            // Retrieve nickname from Firebase Realtime Database
+            database.ref('users/' + user.uid + '/nickname').once('value').then((snapshot) => {
+                const nickname = snapshot.val();
+                localStorage.setItem(`nickname-${user.email}`, nickname);
+                currentUser = user.email;
+                localStorage.setItem('currentUser', currentUser);
+                loginForm.style.display = 'none';
+                gameContent.style.display = 'block';
+                totalTime = 60;
+                timerDisplay.textContent = 'Time: 1:00';
+                startMessage.style.display = 'block';
+                startButton.style.display = 'block';
+            });
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
 });
 
 // Switch to Login
@@ -282,43 +307,51 @@ function snapToGrid(shapeObj) {
     if (snapped) checkWin();
 }
 
-// Function to update the leaderboard
+// Function to update the leaderboard in Firebase
 function updateLeaderboard(nickname, score) {
-    let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-    let playerIndex = -1;
+    const leaderboardRef = database.ref('leaderboard');
+    leaderboardRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        let leaderboard = [];
+        snapshot.forEach((childSnapshot) => {
+            leaderboard.push(childSnapshot.val());
+        });
+        leaderboard.reverse(); // Reverse to get highest scores first
 
-    // Check if player already exists in leaderboard
-    for (let i = 0; i < leaderboard.length; i++) {
-        if (leaderboard[i].nickname === nickname) {
-            playerIndex = i;
-            break;
+        let playerIndex = -1;
+        for (let i = 0; i < leaderboard.length; i++) {
+            if (leaderboard[i].nickname === nickname) {
+                playerIndex = i;
+                break;
+            }
         }
-    }
-
-    if (playerIndex !== -1) {
-        // Player exists, update score if new score is higher
-        if (score > leaderboard[playerIndex].score) {
-            leaderboard[playerIndex].score = score;
+        if (playerIndex !== -1) {
+            if (score > leaderboard[playerIndex].score) {
+                leaderboard[playerIndex].score = score;
+            }
+        } else {
+            leaderboard.push({ nickname, score });
         }
-    } else {
-        // Player doesn't exist, add new entry
-        leaderboard.push({ nickname, score });
-    }
-
-    leaderboard.sort((a, b) => b.score - a.score);
-    leaderboard = leaderboard.slice(0, 10);
-    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-    displayLeaderboard();
+        leaderboard.sort((a, b) => b.score - a.score);
+        leaderboard = leaderboard.slice(0, 10);
+        leaderboardRef.set(leaderboard);
+    });
 }
 
-// Function to display the leaderboard
+// Function to display the leaderboard from Firebase
 function displayLeaderboard() {
-    let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-    leaderboardList.innerHTML = '';
-    leaderboard.forEach(entry => {
-        const li = document.createElement('li');
-        li.textContent = `${entry.nickname}: ${entry.score}`;
-        leaderboardList.appendChild(li);
+    const leaderboardRef = database.ref('leaderboard');
+    leaderboardRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        let leaderboard = [];
+        snapshot.forEach((childSnapshot) => {
+            leaderboard.push(childSnapshot.val());
+        });
+        leaderboard.reverse();
+        leaderboardList.innerHTML = '';
+        leaderboard.forEach(entry => {
+            const li = document.createElement('li');
+            li.textContent = `${entry.nickname}: ${entry.score}`;
+            leaderboardList.appendChild(li);
+        });
     });
 }
 
