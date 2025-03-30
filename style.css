@@ -19,6 +19,16 @@ body {
     padding: 10px;
 }
 
+#start-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size: 24px;
+    color: #fff;
+}
+
 .grid-cell {
     border: 1px solid #333;
     display: flex;
@@ -55,4 +65,16 @@ body {
 .hinted {
     /* Add any additional hint styling here, like a border or shadow */
     border: 2px dashed black;
-  }
+}
+
+hint-disabled {
+    background-color: #555; /* Grey background */
+    color: #888; /* Grey text */
+    cursor: not-allowed; /* Change cursor to "not-allowed" */
+    border: 1px solid #777;
+}
+
+#hint-button {
+  /* add these lines to the hint button */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

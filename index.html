@@ -7,14 +7,47 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="level">Level: 1</div>
-    <div id="timer">Time: 1:00</div>
-    <div id="game-container"></div>
-    <div id="controls">
-        <button id="hint-button">Hint</button>
-        <button id="extra-time-button">+1 Minute</button>
-        <button id="reset-button">Reset</button>
-        <button id="pause-button">Pause</button>  </div>
+    <div id="registration-form" style="display: none;">
+        <h2>Register</h2>
+        <input type="email" id="register-email" placeholder="Email" required><br>
+        <input type="password" id="register-password" placeholder="Password" required><br>
+        <button id="register-button">Register</button>
+        <p>Already have an account? <a href="#" id="login-link">Login</a></p>
+    </div>
+
+    <div id="login-form">
+        <h2>Login</h2>
+        <input type="email" id="login-email" placeholder="Email" required><br>
+        <input type="password" id="login-password" placeholder="Password" required><br>
+        <button id="login-button">Login</button>
+        <p>Don't have an account? <a href="#" id="register-link">Register</a></p>
+    </div>
+
+    <div id="game-content" style="display: none;">
+        <div id="level">Level: 1</div>
+        <div id="timer">Time: 0:00</div>
+        <div id="game-container">
+            <div id="start-message">Press Start to begin</div>
+        </div>
+        <div id="controls">
+            <button id="start-button">Start</button>
+            <button id="hint-button">Hint</button>
+            <button id="reset-button">Reset</button>
+            <button id="pause-button">Pause</button>
+            <button id="logout-button">Logout</button>
+            <button id="account-button">Account</button>
+        </div>
+    </div>
+
+    <div id="account-page" style="display: none;">
+        <h2>Account Settings</h2>
+        <input type="text" id="nickname-input" placeholder="Nickname"><br>
+        <input type="email" id="change-email-input" placeholder="New Email"><br>
+        <input type="password" id="change-password-input" placeholder="New Password"><br>
+        <button id="save-account-button">Save Changes</button>
+        <button id="close-account-button">Close</button>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
