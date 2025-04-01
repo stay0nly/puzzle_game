@@ -31,6 +31,20 @@ const saveAccountButton = document.getElementById('save-account-button');
 const closeAccountButton = document.getElementById('close-account-button');
 const scoreDisplay = document.getElementById('score');
 const leaderboardList = document.getElementById('leaderboard-list');
+const scoreContainer = document.getElementById('score-container');
+const rulesButton = document.getElementById('rules-button');
+const rulesDisplay = document.getElementById('rules-display');
+const closeRulesButton = document.getElementById('close-rules');
+
+// Add event listener to the Rules button
+rulesButton.addEventListener('click', () => {
+    rulesDisplay.style.display = 'block';
+});
+
+// Add event listener to the Close button
+closeRulesButton.addEventListener('click', () => {
+    rulesDisplay.style.display = 'none';
+});
 
 // Firebase Configuration
 const firebaseConfig = {

@@ -27,7 +27,18 @@
     <div id="game-content" style="display: none;">
         <div id="level">Level: 1</div>
         <div id="timer">Time: 0:00</div>
-        <div id="score">Score: 0</div>
+        <div id="score-container">
+            <div id="score">Score: 0</div>
+            <button id="rules-button">Rules</button>
+        </div>
+        <div id="rules-display" style="display: none;">
+            <h2>Game Rules</h2>
+            <p>1. Drag and drop the shapes to their corresponding target cells.</p>
+            <p>2. Complete each level within the time limit.</p>
+            <p>3. Use the Hint button to highlight the target cell.</p>
+            <p>4. Your score increases as you complete levels.</p>
+            <button id="close-rules">Close</button>
+        </div>
         <div id="leaderboard">
             <h2>Leaderboard</h2>
             <ol id="leaderboard-list"></ol>

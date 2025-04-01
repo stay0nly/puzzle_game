@@ -1,3 +1,7 @@
+/* -------------------------------------------------------------------------- */
+/* General Styles */
+/* -------------------------------------------------------------------------- */
+
 body {
     display: flex;
     flex-direction: column;
@@ -9,6 +13,10 @@ body {
     color: #ddd;
     font-family: 'Sagoe UI', sans-serif;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Game Container and Grid */
+/* -------------------------------------------------------------------------- */
 
 #game-container {
     display: grid;
@@ -38,8 +46,8 @@ body {
 }
 
 .shape {
-    width: 80px; /* Adjusted to match grid cell width */
-    height: 80px; /* Adjusted to match grid cell height */
+    width: 80px;
+    height: 80px;
     cursor: grab;
     position: absolute;
 }
@@ -52,25 +60,33 @@ body {
     background-color: #444;
 }
 
+.hinted {
+    border: 2px dashed black;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Game Controls */
+/* -------------------------------------------------------------------------- */
+
 #controls {
     display: flex;
     justify-content: center;
-    margin-top: 15px; /* Reduce margin */
+    margin-top: 15px;
     background-color: #2a2a2a;
-    padding: 10px; /* Reduce padding */
-    border-radius: 8px; /* Reduce border-radius */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4); /* Reduce shadow */
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
 }
 
 #controls button {
-    padding: 8px 15px; /* Reduce padding for buttons */
+    padding: 8px 15px;
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px; /* Reduce border-radius for buttons */
+    border-radius: 4px;
     cursor: pointer;
-    margin: 0 5px; /* Reduce horizontal margin between buttons */
-    font-size: 14px; /* Reduce font size */
+    margin: 0 5px;
+    font-size: 14px;
     font-weight: 500;
     transition: background-color 0.3s ease;
 }
@@ -79,48 +95,89 @@ body {
     background-color: #0056b3;
 }
 
-#controls button:disabled { /* Add this style */
-    background-color: #888; /* Grey background */
-    color: #ccc; /* Light grey text */
-    cursor: not-allowed; /* Change cursor to "not-allowed" */
-}
-
-#controls button:disabled:hover { /* Disable hover effect */
+#controls button:disabled,
+#controls button.hint-disabled {
     background-color: #888;
+    color: #ccc;
+    cursor: not-allowed;
 }
 
-#controls button.hint-disabled { /* Add this style */
-    background-color: #888; /* Grey background */
-    color: #ccc; /* Light grey text */
-    cursor: not-allowed; /* Change cursor to "not-allowed" */
-}
-
-#controls button.hint-disabled:hover { /* Disable hover effect */
+#controls button:disabled:hover,
+#controls button.hint-disabled:hover {
     background-color: #888;
-}
-
-#timer, #level {
-    margin: 10px;
-}
-
-.hinted {
-    /* Add any additional hint styling here, like a border or shadow */
-    border: 2px dashed black;
-}
-
-hint-disabled {
-    background-color: #555; /* Grey background */
-    color: #888; /* Grey text */
-    cursor: not-allowed; /* Change cursor to "not-allowed" */
-    border: 1px solid #777;
 }
 
 #hint-button {
-  /* add these lines to the hint button */
-  transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-#login-form, #registration-form, #account-page { /* Add #account-page here */
+/* -------------------------------------------------------------------------- */
+/* Game Info (Timer, Level, Score) */
+/* -------------------------------------------------------------------------- */
+
+#timer, #level, #score {
+    margin: 10px;
+}
+
+#score {
+    margin-top: 0px;
+}
+
+#game-info {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+}
+
+#game-info div {
+    margin: 10px;
+}
+
+#score-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+#rules-button, #close-rules {
+    padding: 5px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+#rules-display {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    background-color: #2a2a2a;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    color: #ddd;
+    width: 300px;
+    z-index: 10;
+}
+
+#rules-display h2 {
+    margin-top: 0;
+    text-align: center;
+}
+
+#rules-display p {
+    margin-bottom: 10px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Login, Registration, Account Forms */
+/* -------------------------------------------------------------------------- */
+
+#login-form, #registration-form, #account-page {
     background-color: #2a2a2a;
     padding: 30px;
     border-radius: 12px;
@@ -129,14 +186,14 @@ hint-disabled {
     text-align: center;
 }
 
-#login-form h2, #registration-form h2, #account-page h2 { /* Add #account-page here */
+#login-form h2, #registration-form h2, #account-page h2 {
     color: #ddd;
     margin-bottom: 30px;
     font-size: 28px;
     font-weight: 600;
 }
 
-#login-form input, #registration-form input, #account-page input { /* Add #account-page here */
+#login-form input, #registration-form input, #account-page input {
     width: calc(100% - 24px);
     padding: 12px;
     margin: 10px 0;
@@ -148,7 +205,7 @@ hint-disabled {
     font-size: 16px;
 }
 
-#login-form button, #registration-form button, #account-page button { /* Add #account-page here */
+#login-form button, #registration-form button, #account-page button {
     width: 100%;
     padding: 14px;
     background-color: #007bff;
@@ -162,32 +219,29 @@ hint-disabled {
     transition: background-color 0.3s ease;
 }
 
-#login-form button:hover, #registration-form button:hover, #account-page button:hover { /* Add #account-page here */
+#login-form button:hover, #registration-form button:hover, #account-page button:hover {
     background-color: #0056b3;
 }
 
-#login-form a, #registration-form a, #account-page a { /* Add #account-page here. If you add links to account page */
+#login-form a, #registration-form a, #account-page a {
     color: #007bff;
     text-decoration: none;
     font-size: 16px;
     transition: text-decoration 0.3s ease;
 }
 
-#login-form a:hover, #registration-form a:hover, #account-page a:hover { /* Add #account-page here. If you add links to account page */
+#login-form a:hover, #registration-form a:hover, #account-page a:hover {
     text-decoration: underline;
 }
 
-#login-form p, #registration-form p, #account-page p { /* Add #account-page here. If you add paragraphs to account page */
+#login-form p, #registration-form p, #account-page p {
     margin-top: 15px;
     font-size: 16px;
 }
 
-#score {
-    margin: 10px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #007bff;
-}
+/* -------------------------------------------------------------------------- */
+/* Leaderboard */
+/* -------------------------------------------------------------------------- */
 
 #leaderboard {
     position: absolute;
