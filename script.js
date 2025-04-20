@@ -46,6 +46,26 @@ closeRulesButton.addEventListener('click', () => {
     rulesDisplay.style.display = 'none';
 });
 
+// Function to close the rules display
+function closeRules() {
+    rulesDisplay.style.display = 'none';
+}
+
+// Event listener for the Rules button
+rulesButton.addEventListener('click', () => {
+    rulesDisplay.style.display = 'block';
+});
+
+// Event listener for the Close button (optional, for redundancy)
+closeRulesButton.addEventListener('click', closeRules);
+
+// Event listener to close rules when clicking anywhere outside the rules display
+document.addEventListener('click', (event) => {
+    if (rulesDisplay.style.display === 'block' && !rulesDisplay.contains(event.target) && event.target !== rulesButton) {
+        closeRules();
+    }
+});
+
 // Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAxPMh5eVCYvczqJr3d0isPL5aKC828AJc",
@@ -220,10 +240,19 @@ function startGame() {
 }
 
 function createGrid() {
+    gameContainer.innerHTML = '';
     for (let i = 0; i < 25; i++) {
         const cell = document.createElement('div');
         cell.classList.add('grid-cell');
         gameContainer.appendChild(cell);
+    }
+    // Add obstacle class to obstacle cells
+    if (currentLevelData && currentLevelData.obstacles) {
+        currentLevelData.obstacles.forEach(obstacleIndex => {
+            if (gameContainer.children[obstacleIndex]) {
+                gameContainer.children[obstacleIndex].classList.add('obstacle');
+            }
+        });
     }
 }
 
@@ -231,7 +260,10 @@ function createShapesAndTargets(levelData) {
     shapes = [];
     targets = [];
     gameContainer.querySelectorAll('.shape').forEach(shape => shape.remove());
-    gameContainer.querySelectorAll('.target').forEach(target => target.classList.remove('target'));
+    gameContainer.querySelectorAll('.target').forEach(target => {
+        target.classList.remove('target');
+        target.textContent = ''; // Clear any previous numbers
+    });
 
     levelData.shapes.forEach(shape => {
         const shapeElement = document.createElement('div');
@@ -241,19 +273,33 @@ function createShapesAndTargets(levelData) {
         shapeElement.style.top = shape.startTop;
         shapeElement.dataset.originalLeft = shape.startLeft;
         shapeElement.dataset.originalTop = shape.startTop;
+        shapeElement.dataset.targetOrder = shape.order; // Store the required order
         gameContainer.appendChild(shapeElement);
-        shapes.push({ element: shapeElement, target: shape.target });
+        shapes.push({ element: shapeElement, target: shape.target, order: shape.order });
     });
 
-    levelData.targets.forEach(targetIndex => {
-        gameContainer.children[targetIndex].classList.add('target');
+    levelData.targets.forEach((targetIndex, index) => {
+        const targetCell = gameContainer.children[targetIndex];
+        targetCell.classList.add('target');
+        targetCell.textContent = index + 1; // Display the target number
         targets.push(targetIndex);
     });
+
+    if (currentLevelData && currentLevelData.obstacles) {
+        currentLevelData.obstacles.forEach(obstacleIndex => {
+            if (gameContainer.children[obstacleIndex]) {
+                gameContainer.children[obstacleIndex].classList.add('obstacle');
+            }
+        });
+    }
 
     setupDragAndDrop();
     hintIndex = 0;
     gameContainer.querySelectorAll(".hinted").forEach(hinted => hinted.classList.remove("hinted"));
+    expectedTargetOrder = 1; // Initialize the expected target order
 }
+
+let expectedTargetOrder = 1;
 
 function setupDragAndDrop() {
     shapes.forEach(shapeObj => {
@@ -280,6 +326,7 @@ function setupDragAndDrop() {
             isDragging = false;
             shape.classList.remove('dragging');
             shape.style.zIndex = 1;
+            e.preventDefault(); // Prevent default drag-and-drop behavior
             snapToGrid(shapeObj);
         });
     });
@@ -289,24 +336,37 @@ function snapToGrid(shapeObj) {
     const shape = shapeObj.element;
     const shapeRect = shape.getBoundingClientRect();
     const gridCells = Array.from(gameContainer.children);
+    const shapeOrder = parseInt(shape.dataset.targetOrder);
+
+    console.log("Dragging shape order:", shapeOrder, "Expected order:", expectedTargetOrder);
 
     let snapped = false;
-    gridCells.forEach((cell, index) => {
+    let snappedCellIndex = -1;
+
+    for (let i = 0; i < gridCells.length; i++) {
+        const cell = gridCells[i];
         const cellRect = cell.getBoundingClientRect();
+        const cellTargetOrder = parseInt(cell.textContent);
 
         const overlapX = Math.max(0, Math.min(shapeRect.right, cellRect.right) - Math.max(shapeRect.left, cellRect.left));
         const overlapY = Math.max(0, Math.min(shapeRect.bottom, cellRect.bottom) - Math.max(shapeRect.top, cellRect.top));
         const overlapArea = overlapX * overlapY;
+        const overlapPercentage = overlapArea / (shapeRect.width * shapeRect.height);
 
-        const shapeArea = shapeRect.width * shapeRect.height;
+        if (overlapPercentage > 0.8) {
+            console.log("Overlapping with cell:", i, "Target Order:", cellTargetOrder, "Is Target:", cell.classList.contains('target'), "Is Obstacle:", cell.classList.contains('obstacle'));
 
-        const overlapPercentage = overlapArea / shapeArea;
-
-        if (overlapPercentage > 0.8 && targets.includes(index)) {
-            shape.style.left = cellRect.left + 'px';
-            shape.style.top = cellRect.top + 'px';
-            if (shapeObj.target === index) {
+            if (cell.classList.contains('obstacle')) {
+                shape.style.left = shape.dataset.originalLeft;
+                shape.style.top = shape.dataset.originalTop;
+                console.log("Prevented snap to obstacle.");
+            } else if (cell.classList.contains('target') && cellTargetOrder === shapeOrder && shapeOrder === expectedTargetOrder) {
+                shape.style.left = cellRect.left + 'px';
+                shape.style.top = cellRect.top + 'px';
                 snapped = true;
+                snappedCellIndex = i;
+                console.log("Snapped to cell:", i);
+                break; // Exit the loop once snapped
             } else {
                 const originalColor = getComputedStyle(shape).backgroundColor;
                 shape.style.backgroundColor = 'white';
@@ -314,11 +374,20 @@ function snapToGrid(shapeObj) {
                     shape.style.backgroundColor = originalColor;
                     shape.style.left = shape.dataset.originalLeft;
                     shape.style.top = shape.dataset.originalTop;
+                    console.log("Reverted color and position due to incorrect target or order.");
                 }, 1000);
             }
         }
-    });
-    if (snapped) checkWin();
+    }
+
+    if (snapped) {
+        console.log("Shape successfully snapped. Incrementing expected order.");
+        expectedTargetOrder++;
+        shapeObj.placed = true;
+        checkWin();
+    } else {
+        console.log("No snap occurred.");
+    }
 }
 
 // Function to update the leaderboard in Firebase
@@ -373,30 +442,27 @@ function displayLeaderboard() {
 displayLeaderboard();
 
 function checkWin() {
-    let allCorrect = true;
-    shapes.forEach(shapeObj => {
-        const shapeRect = shapeObj.element.getBoundingClientRect();
-        const targetCellRect = gameContainer.children[shapeObj.target].getBoundingClientRect();
-        if (!(shapeRect.left === targetCellRect.left && shapeRect.top === targetCellRect.top)) {
-            allCorrect = false;
+    const allCorrect = shapes.every(shapeObj => {
+        if (shapeObj.placed) {
+            const shapeRect = shapeObj.element.getBoundingClientRect();
+            const targetCellRect = gameContainer.children[shapeObj.target].getBoundingClientRect();
+            return shapeRect.left === targetCellRect.left && shapeRect.top === targetCellRect.top;
         }
+        return false;
     });
 
-    if (allCorrect) {
+    if (allCorrect && expectedTargetOrder > shapes.length) {
         level++;
         levelDisplay.textContent = `Level: ${level}`;
         totalTime += 30;
 
-        // Calculate score
-        const levelPoints = 20 * (2 ** (level - 2)); // Calculate points based on level
-        if (level === 1){
+        const levelPoints = 20 * (2 ** (level - 2));
+        if (level === 1) {
             levelPoints = 20;
         }
-
         score += levelPoints;
         scoreDisplay.textContent = `Score: ${score}`;
 
-        // Update leaderboard if score is 20 or more
         if (score >= 20) {
             const nickname = localStorage.getItem(`nickname-${currentUser}`) || 'Player';
             updateLeaderboard(nickname, score);
@@ -425,40 +491,45 @@ function startTimer() {
 
 function loadLevel(level) {
     currentLevelData = getLevelData(level);
+    createGrid(); // Call createGrid AFTER getLevelData to use the obstacle information
     createShapesAndTargets(currentLevelData);
     hintUsed = false;
     hintButton.classList.remove('hint-disabled');
-    hintButton.disabled = false; // Enable the button
+    hintButton.disabled = false;
 }
 
 function getLevelData(level) {
     let startLeft = 10;
     let startTop = 10;
     const spacing = 90;
-    let numShapes = Math.min(level + 2, 9); // Number of shapes
+    let numShapes = Math.min(level + 2, 9);
     const shapes = [];
     const targets = [];
+    const obstacles = [];
     const colors = ['lightblue', 'lightgreen', 'lightcoral', 'yellow', 'orange', 'purple', 'cyan', 'pink', 'brown', 'gray', 'olive', 'teal', 'indigo', 'violet', 'gold', 'silver', 'salmon', 'coral', 'khaki', 'lavender', 'lime', 'maroon', 'blue', 'red', 'green', 'navy', 'crimson', 'forestgreen', 'goldenrod', 'darkorange', 'mediumpurple', 'skyblue', 'firebrick', 'seagreen', 'darkgoldenrod', 'peru', 'thistle'];
     const usedColors = [];
     const usedTargets = [];
+    const usedObstacles = [];
+    const gridSize = 25;
 
     const rowThreshold = 5;
+    const numObstacles = Math.floor(level / 2);
 
-    // Ensure numShapes doesn't exceed grid cells
-    numShapes = Math.min(numShapes, 25); // Limit to 25 grid cells
+    for (let i = 0; i < numObstacles; i++) {
+        let obstacleIndex;
+        do {
+            obstacleIndex = Math.floor(Math.random() * gridSize);
+        } while (usedObstacles.includes(obstacleIndex) || usedTargets.includes(obstacleIndex));
+        obstacles.push(obstacleIndex);
+        usedObstacles.push(obstacleIndex);
+    }
 
     for (let i = 0; i < numShapes; i++) {
-        let color, target;
-
+        let color, targetIndex;
         do {
-            color = colors[Math.floor(Math.random() * colors.length)];
-        } while (usedColors.includes(color));
-        usedColors.push(color);
-
-        do {
-            target = Math.floor(Math.random() * 25);
-        } while (usedTargets.includes(target));
-        usedTargets.push(target);
+            targetIndex = Math.floor(Math.random() * gridSize);
+        } while (usedTargets.includes(targetIndex) || usedObstacles.includes(targetIndex));
+        usedTargets.push(targetIndex);
 
         let shapeLeft = startLeft;
         let shapeTop = startTop;
@@ -471,19 +542,16 @@ function getLevelData(level) {
         }
 
         shapes.push({
-            color: color,
+            color: color = colors[Math.floor(Math.random() * colors.length)],
             startLeft: `${shapeLeft}px`,
             startTop: `${shapeTop}px`,
-            target: target
+            target: targetIndex, // Store the target index
+            order: i + 1 // Assign sequential order
         });
+        targets.push(targetIndex); // Keep track of target indices
     }
 
-    //only push targets here.
-    for(let target of usedTargets){
-        targets.push(target);
-    }
-
-    return { shapes: shapes, targets: targets };
+    return { shapes: shapes, targets: targets, obstacles: obstacles };
 }
 
 hintButton.addEventListener('click', () => {
